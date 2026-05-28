@@ -22,27 +22,27 @@ El objetivo del sistema es centralizar el seguimiento de asistencia docente, dif
 
 ### 1. Dashboard
 
-![Dashboard](capturas/captura%20pesta%C3%B1a%20dashboard.png)
+![Dashboard](capturas/dashboard.png)
 
 ### 2. Horario
 
-![Horario](capturas/captura%20pesta%C3%B1a%20horario.png)
+![Horario](capturas/horario.png)
 
 ### 3. Calendario
 
-![Calendario](capturas/captura%20pesta%C3%B1a%20calendario.png)
+![Calendario](capturas/calendario.png)
 
 ### 4. Reporte
 
-![Reporte](capturas/captura%20pesta%C3%B1a%20reporte.png)
+![Reporte](capturas/reporte.png)
 
 ### 5. Informe
 
-![Informe](capturas/captura%20pesta%C3%B1a%20informe.png)
+![Informe](capturas/informe.png)
 
 ### 6. Resumen
 
-![Resumen](capturas/captura%20pesta%C3%B1a%20resumen.png)
+![Resumen](capturas/resumen.png)
 
 ## Modulos del sistema
 
