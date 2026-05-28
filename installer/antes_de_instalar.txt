@@ -1,0 +1,17 @@
+﻿BIENVENIDO AL INSTALADOR DE REPORTE DOCENTE
+Fis: Waldir Huanque J.
+
+Este asistente instalara la aplicacion en su equipo para:
+
+- Analizar asistencia docente
+- Exportar reportes PDF
+- Imprimir informes individuales y masivos
+
+Requisitos recomendados:
+- Windows 10/11 de 64 bits
+- Permisos de administrador para instalar en Program Files
+- Impresora configurada (opcional, para modulo de impresion)
+
+Durante la ejecucion, la aplicacion guarda configuracion y archivos de trabajo en:
+Documentos\Reporte Docente
+

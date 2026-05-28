@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Entornos virtuales
+reporte/
+.venv/
+venv/
+env/
+
+# Builds y empaquetados
+build/
+dist/
+dist_installer/
+*.spec~
+*.manifest
+
+# Instaladores / binarios generados
+*.exe
+*.msi
+*.zip
+*.7z
+
+# Datos locales y privados
+data/
+logs/
+*.log
+*.xls
+*.xlsx
+*.csv
+*.pdf
+
+# Archivos temporales
+temp_chunk.txt
+*.tmp
+*.bak
+~$*
+
+# Sistema / IDE
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Cache de Qt / PySide
+*.qmlc
+*.jsc

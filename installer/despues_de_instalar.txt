@@ -1,0 +1,12 @@
+INSTALACION COMPLETADA
+
+Gracias por instalar Reporte Docente.
+
+Siguientes pasos recomendados:
+1. Abrir la aplicacion desde el acceso directo creado.
+2. Revisar Configuracion > Tema y Rutas.
+3. Verificar carpeta de trabajo en Documentos\Reporte Docente.
+4. Probar una exportacion e impresion de prueba.
+
+Si necesita soporte, contacte al responsable tecnico de su despliegue.
+

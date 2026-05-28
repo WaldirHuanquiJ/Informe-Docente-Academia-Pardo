@@ -1,0 +1,21 @@
+﻿LICENCIA DE USO - REPORTE DOCENTE
+Fis: Waldir Huanque J.
+
+Al instalar y utilizar este software, usted acepta los siguientes terminos:
+
+1. Uso permitido
+- Este software se entrega para fines academicos y administrativos relacionados con el control de asistencia docente.
+
+2. Restricciones
+- No se permite la reventa ni redistribucion no autorizada del software.
+- No se permite modificar el software para usos ilicitos.
+
+3. Datos y privacidad
+- El usuario es responsable del manejo y proteccion de los datos que procesa con la aplicacion.
+
+4. Soporte
+- El soporte tecnico depende del canal definido por el responsable del despliegue.
+
+5. Aceptacion
+- Al presionar "Acepto" en el instalador, usted declara haber leido y aceptado estos terminos.
+
