@@ -214,7 +214,12 @@ QPushButton:disabled {
     border: 1px solid #253550;
     color: #5a6e8a;
 }
-
+QPushButton[compactAction="true"] {
+    border-radius: 14px;
+    min-height: 25px;
+    max-height: 25px;
+    padding: 4px 12px;
+}
 /* Botón de importar (acento verde) */
 QPushButton#actionImport {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
@@ -1006,7 +1011,12 @@ QPushButton:disabled {
     border: 1px solid #d9e1ec;
     color: #8a93a3;
 }
-QPushButton#actionImport { background: #e7f8ef; border-color: #b8e6cb; color: #0f6b43; }
+QPushButton[compactAction="true"] {
+    border-radius: 14px;
+    min-height: 25px;
+    max-height: 25px;
+    padding: 4px 12px;
+}QPushButton#actionImport { background: #e7f8ef; border-color: #b8e6cb; color: #0f6b43; }
 QPushButton#actionImport:hover { background: #daf3e5; }
 QPushButton#actionClear { background: #fff1e3; border-color: #f2d2ae; color: #9a5a08; }
 QPushButton#actionClear:hover { background: #ffe8d3; }
@@ -1291,3 +1301,5 @@ QDoubleSpinBox#weekHoursInput {
     font-weight: 700;
 }
 """
+
+

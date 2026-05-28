@@ -100,6 +100,8 @@ class CalendarioView:
         self.btn_save.setObjectName("actionExport")
         self.btn_mark_all.setObjectName("actionImport")
         self.btn_mark_none.setObjectName("actionClear")
+        for btn in (self.btn_load, self.btn_save, self.btn_mark_all, self.btn_mark_none):
+            btn.setProperty("compactAction", True)
         self.btn_load.setIcon(make_load_month_icon(20))
         self.btn_mark_all.setIcon(make_check_all_icon(20))
         self.btn_mark_none.setIcon(make_uncheck_all_icon(20))
@@ -160,6 +162,8 @@ class CalendarioView:
         self.btn_susp_remove = QPushButton("Quitar seleccion")
         self.btn_susp_add.setObjectName("actionImport")
         self.btn_susp_remove.setObjectName("actionClear")
+        self.btn_susp_add.setProperty("compactAction", True)
+        self.btn_susp_remove.setProperty("compactAction", True)
         self.btn_susp_add.setIcon(make_check_all_icon(20))
         self.btn_susp_remove.setIcon(make_uncheck_all_icon(20))
         self.btn_susp_add.setIconSize(QSize(20, 20))
