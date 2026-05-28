@@ -10,9 +10,27 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=[
+        # Dependencias de desarrollo/pruebas
+        'pytest',
+        '_pytest',
+        'pygments',
+        'pluggy',
+        'iniconfig',
+        # Backends cientificos/opcionales no usados por la app de escritorio
+        'matplotlib',
+        'scipy',
+        'pandas',
+        'pyarrow',
+        'polars',
+        'numba',
+        'skimage',
+        'IPython',
+        'notebook',
+        'jupyter',
+    ],
     noarchive=False,
-    optimize=0,
+    optimize=1,
 )
 pyz = PYZ(a.pure)
 

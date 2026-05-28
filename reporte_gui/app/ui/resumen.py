@@ -5,7 +5,7 @@ from pathlib import Path
 
 import plotly.graph_objects as go
 from plotly.io import to_html
-from PySide6.QtCore import Qt, QUrl
+from PySide6.QtCore import Qt, QTimer, QUrl
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (
     QComboBox,
@@ -41,9 +41,15 @@ class ResumenView:
         self.report: AttendanceReport | None = None
         self._theme_mode = "dark"
         self._rows_cache: list[dict[str, object]] = []
-
+        self._summary_cache: dict[tuple[str, str, str, str], list[dict[str, object]]] = {}
+        self._slot_matrix_cache: dict[int, list[list[str]]] = {}
+        self._last_chart_signature: tuple | None = None
         self.tab = QWidget()
         self.tab.setObjectName("ResumenTab")
+        self._refresh_timer = QTimer(self.tab)
+        self._refresh_timer.setSingleShot(True)
+        self._refresh_timer.setInterval(120)
+        self._refresh_timer.timeout.connect(self._refresh_view)
 
         self.title = QLabel("Resumen de Distribucion Horaria")
         self.title.setObjectName("ResumenTitle")
@@ -104,10 +110,10 @@ class ResumenView:
         layout.addWidget(self.chart, 1)
         self.table.hide()
 
-        self.group_combo.currentIndexChanged.connect(self._refresh_view)
-        self.schedule_combo.currentIndexChanged.connect(self._refresh_view)
-        self.course_combo.currentIndexChanged.connect(self._refresh_view)
-        self.teacher_combo.currentIndexChanged.connect(self._refresh_view)
+        self.group_combo.currentIndexChanged.connect(self._schedule_refresh_view)
+        self.schedule_combo.currentIndexChanged.connect(self._schedule_refresh_view)
+        self.course_combo.currentIndexChanged.connect(self._schedule_refresh_view)
+        self.teacher_combo.currentIndexChanged.connect(self._schedule_refresh_view)
 
         self._apply_local_style()
         self._set_empty("Cargue un reporte y un horario para ver el resumen.")
@@ -115,30 +121,37 @@ class ResumenView:
     def set_theme_mode(self, theme_mode: str) -> None:
         self._theme_mode = "light" if theme_mode == "light" else "dark"
         self._apply_local_style()
+        self._last_chart_signature = None
         self._refresh_view()
 
     def set_schedule_file(self, schedule_path: Path) -> None:
         self._schedule_path = schedule_path
         self._engine.set_schedule_file(schedule_path)
-        if self.report:
-            self.refresh(self.report)
+        self._clear_caches()
 
     def reload_schedule_source(self) -> None:
         self._engine.set_schedule_file(self._schedule_path)
-        if self.report:
-            self.refresh(self.report)
+        self._clear_caches()
 
     def refresh(self, report: AttendanceReport) -> None:
         self.report = report
         self._engine.set_schedule_file(self._schedule_path)
         self._engine.set_report(report)
+        self._clear_caches()
         self._rebuild_filter_options()
         self._refresh_view()
 
     def clear_all(self) -> None:
         self.report = None
+        self._clear_caches()
         self.table.setRowCount(0)
         self._set_empty("Sin datos para resumir.")
+
+    def _clear_caches(self) -> None:
+        self._rows_cache = []
+        self._summary_cache.clear()
+        self._slot_matrix_cache.clear()
+        self._last_chart_signature = None
 
     def _rebuild_filter_options(self) -> None:
         if not self.report:
@@ -181,10 +194,26 @@ class ResumenView:
         if not self.report:
             self._set_empty("Cargue un reporte y un horario para ver el resumen.")
             return
-        rows = self._build_summary_rows()
+        cache_key = self._filters_key()
+        rows = self._summary_cache.get(cache_key)
+        if rows is None:
+            rows = self._build_summary_rows()
+            self._summary_cache[cache_key] = rows
         self._rows_cache = rows
-        self._render_table(rows)
+        if self.table.isVisible():
+            self._render_table(rows)
         self._render_chart(rows)
+
+    def _schedule_refresh_view(self) -> None:
+        self._refresh_timer.start()
+
+    def _filters_key(self) -> tuple[str, str, str, str]:
+        return (
+            self.group_combo.currentText().strip(),
+            self.schedule_combo.currentText().strip(),
+            self.course_combo.currentText().strip(),
+            self._selected_teacher_name(),
+        )
 
     def _build_summary_rows(self) -> list[dict[str, object]]:
         if not self.report:
@@ -198,10 +227,6 @@ class ResumenView:
             lambda: {"attendance": 0, "debt": 0, "assigned": 0, "teachers": set(), "courses": set()}
         )
 
-        day_slot_values_by_teacher = {
-            id(teacher): self._engine._build_day_slot_values(teacher)
-            for teacher in self.report.teachers
-        }
         day_idx_map = {day: idx for idx, day in enumerate(self.report.days)}
 
         for teacher in self.report.teachers:
@@ -210,7 +235,7 @@ class ResumenView:
                 continue
             if teacher_filter and teacher.name != teacher_filter:
                 continue
-            slot_matrix = day_slot_values_by_teacher.get(id(teacher), [])
+            slot_matrix = self._slot_matrix_for_teacher(teacher)
             for day in self.report.days:
                 day_pos = day_idx_map.get(day)
                 if day_pos is None or day_pos >= len(slot_matrix):
@@ -266,6 +291,14 @@ class ResumenView:
             )
         return sorted(rows, key=lambda x: (float(x["debt_pct"]), int(x["debt"])), reverse=True)
 
+    def _slot_matrix_for_teacher(self, teacher: TeacherRecord) -> list[list[str]]:
+        key = id(teacher)
+        matrix = self._slot_matrix_cache.get(key)
+        if matrix is None:
+            matrix = self._engine._build_day_slot_values(teacher)
+            self._slot_matrix_cache[key] = matrix
+        return matrix
+
     def _schedule_name_for_slot(self, modality_slots: dict[str, set[int]], slot_idx: int, selected: str) -> str:
         if selected != "Todos":
             return selected if slot_idx in modality_slots.get(selected, set()) else ""
@@ -320,6 +353,17 @@ class ResumenView:
         debt_pct = [float(row["debt_pct"]) for row in rows]
         attendance_hours = [_format_hm(int(row["attendance"])) for row in rows]
         debt_hours = [_format_hm(int(row["debt"])) for row in rows]
+        signature = (
+            self._theme_mode,
+            tuple(labels),
+            tuple(attendance_pct),
+            tuple(debt_pct),
+            tuple(attendance_hours),
+            tuple(debt_hours),
+        )
+        if signature == self._last_chart_signature:
+            return
+        self._last_chart_signature = signature
 
         is_light = self._theme_mode == "light"
         paper = "#f3f7fb" if is_light else "#08111f"

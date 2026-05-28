@@ -221,14 +221,14 @@ class MainWindow(QMainWindow):
         self.reporte_view.set_report(self.report)
         # Precarga completa para que el cambio de pestañas sea inmediato.
         self.dashboard.refresh(self.report)
-        self.informe_view.set_report(self.report)
-        self.resumen_view.refresh(self.report)
+        self.informe_view.set_report(self.report, refresh_preview=False)
         self._dashboard_needs_refresh = False
-        self._informe_needs_refresh = False
-        self._resumen_needs_refresh = False
+        self._informe_needs_refresh = True
+        self._resumen_needs_refresh = True
         self._dashboard_panel_dirty = False
-        self._informe_panel_dirty = False
+        self._informe_panel_dirty = True
         self._sync_from_dashboard_to_informe()
+        self._refresh_visible_heavy_tabs()
 
     def _refresh_visible_heavy_tabs(self) -> None:
         if not self.report:
@@ -243,7 +243,7 @@ class MainWindow(QMainWindow):
             self._dashboard_panel_dirty = False
         # Informe tab
         if self._informe_needs_refresh and idx == 4:
-            self.informe_view.set_report(self.report)
+            self.informe_view.set_report(self.report, refresh_preview=False)
             self._restore_selected_teacher(self.informe_view.teacher_selector)
             self.informe_view._refresh_all()
             self._informe_needs_refresh = False
@@ -261,9 +261,6 @@ class MainWindow(QMainWindow):
 
     def _on_tab_changed(self, _index: int) -> None:
         self._refresh_visible_heavy_tabs()
-        if _index == 5 and self.report:
-            self.resumen_view.refresh(self.report)
-            self._resumen_needs_refresh = False
 
     def _on_calendar_updated(self) -> None:
         if not self.report:
@@ -280,7 +277,7 @@ class MainWindow(QMainWindow):
             self._dashboard_needs_refresh = True
             self._dashboard_panel_dirty = True
         if current_idx == 4:
-            self.informe_view.set_report(self.report)
+            self.informe_view.set_report(self.report, refresh_preview=False)
             self._restore_selected_teacher(self.informe_view.teacher_selector)
             self.informe_view._refresh_all()
             self._informe_needs_refresh = False
@@ -348,6 +345,7 @@ class MainWindow(QMainWindow):
             self._syncing_teacher_selection = False
         if self.tabs.currentIndex() == 4 and synced:
             self.informe_view._refresh_all()
+            self._informe_needs_refresh = False
             self._informe_panel_dirty = False
         else:
             self._informe_panel_dirty = synced or changed or self._informe_panel_dirty
@@ -472,7 +470,7 @@ class MainWindow(QMainWindow):
         self.horario_view.reload()
         self.reporte_view.reload_schedule_source()
         self.dashboard.reload_schedule_source()
-        self.informe_view.reload_schedule_source()
+        self.informe_view.reload_schedule_source(refresh_preview=False)
         self.resumen_view.reload_schedule_source()
         self.refresh_data()
 

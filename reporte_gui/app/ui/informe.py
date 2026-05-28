@@ -104,6 +104,8 @@ class InformeView:
         self._preferred_printer: str = ""
         self._last_print_options: PrintOptions | None = None
         self._theme_mode: str = "dark"
+        self._metrics_cache: dict[tuple[str, str, str], dict] = {}
+        self._day_slot_cache: dict[tuple[str, str, str], list[list[str]]] = {}
 
         # ── Encabezado ───────────────────────────────────────────────────
         self.hero_title = QLabel("Informe Individual Docente")
@@ -388,16 +390,20 @@ class InformeView:
 
     # ── Orquestadores ────────────────────────────────────────────────────
 
-    def reload_schedule_source(self) -> None:
+    def reload_schedule_source(self, *, refresh_preview: bool = True) -> None:
+        self._clear_runtime_caches()
         self._load_schedule_rules()
-        self._refresh_all()
+        if refresh_preview:
+            self._refresh_all()
 
     def set_schedule_file(self, schedule_path: Path) -> None:
         self._schedule_path = schedule_path
         self._reporte_engine.set_schedule_file(schedule_path)
+        self._clear_runtime_caches()
 
-    def set_report(self, report: AttendanceReport) -> None:
+    def set_report(self, report: AttendanceReport, *, refresh_preview: bool = True) -> None:
         self.report = report
+        self._clear_runtime_caches()
         self._reporte_engine.set_schedule_file(self._schedule_path)
         self._reporte_engine.set_report(report)
         self._load_schedule_rules()
@@ -407,10 +413,16 @@ class InformeView:
             self._report_teachers_all = list(report.teachers)
         self._report_teachers_all.sort(key=lambda t: t.name.lower())
         self._refresh_teacher_selector()
-        self._refresh_all()
+        if refresh_preview:
+            self._refresh_all()
+
+    def _clear_runtime_caches(self) -> None:
+        self._metrics_cache.clear()
+        self._day_slot_cache.clear()
 
     def clear_all(self) -> None:
         self.report = None
+        self._clear_runtime_caches()
         self._report_teachers_all = []
         self.teacher_selector.clear()
         self.daily_table.setRowCount(0); self.daily_table.setColumnCount(0)
@@ -541,6 +553,10 @@ class InformeView:
     def _compute_teacher_metrics(self, teacher: TeacherRecord) -> dict:
         if not self.report:
             return {}
+        cache_key = self._teacher_cache_key(teacher)
+        cached = self._metrics_cache.get(cache_key)
+        if cached is not None:
+            return dict(cached)
         base = self._report_column_metrics(teacher, self.report.days)
         total_seconds = base["total_asistencia"]
         tardiness_seconds = base["total_tardanza"]
@@ -593,7 +609,7 @@ class InformeView:
         compliance_pct_value = min((compliance_attended / compliance_base) * 100.0, 100.0) if expected_seconds > 0 else 0.0
         compliance_pct = round(compliance_pct_value, 1)
 
-        return {
+        metrics = {
             "total_hours": total_seconds,
             "tardiness": tardiness_seconds,
             "absence": absence_seconds,
@@ -614,6 +630,8 @@ class InformeView:
             "absence_blocks": absence_blocks,
             "schedule_compliance_pct": compliance_pct,
         }
+        self._metrics_cache[cache_key] = dict(metrics)
+        return metrics
 
     def _pending_regularization_count(self, teacher: TeacherRecord, days: list[int]) -> int:
         if not self.report:
@@ -815,7 +833,19 @@ class InformeView:
         return self._reporte_engine._effective_block_seconds(block_text, slot_idx)
 
     def _build_day_slot_values(self, teacher: TeacherRecord) -> list[list[str]]:
-        return self._reporte_engine._build_day_slot_values(teacher)
+        cache_key = self._teacher_cache_key(teacher)
+        cached = self._day_slot_cache.get(cache_key)
+        if cached is None:
+            cached = self._reporte_engine._build_day_slot_values(teacher)
+            self._day_slot_cache[cache_key] = cached
+        return cached
+
+    def _teacher_cache_key(self, teacher: TeacherRecord) -> tuple[str, str, str]:
+        return (
+            (teacher.teacher_id or "").strip(),
+            (teacher.name or "").strip(),
+            (teacher.department or "").strip(),
+        )
 
     def _append_slot_value(self, slot_values: list[str], slot_idx: int, text: str) -> None:
         if not (0 <= slot_idx < len(slot_values)):
