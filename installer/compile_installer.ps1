@@ -1,5 +1,5 @@
 param(
-    [string]$IssPath = "L:\Softwares\REPORTE DOCENTE\installer\ReporteDocente.iss"
+    [string]$IssPath = "L:\Softwares\REPORTE DOCENTE-RELEASE2\installer\ReporteDocente.iss"
 )
 
 $ErrorActionPreference = "Stop"
@@ -15,7 +15,7 @@ function Find-ISCC {
         $candidates += $cmd.Source
     }
 
-    $found = $candidates | Select-Object -Unique | Where-Object { Test-Path $_ }
+    $found = @($candidates | Select-Object -Unique | Where-Object { Test-Path $_ })
     if ($found.Count -gt 0) {
         return $found[0]
     }
@@ -42,10 +42,9 @@ if (-not $iscc) {
 Write-Host "Usando ISCC: $iscc" -ForegroundColor Green
 & $iscc $IssPath
 
-$outDir = "L:\Softwares\REPORTE DOCENTE\dist_installer"
+$outDir = "L:\Softwares\REPORTE DOCENTE-RELEASE2\dist_installer"
 if (Test-Path $outDir) {
     Write-Host ""
     Write-Host "Compilacion finalizada. Revisa:" -ForegroundColor Green
     Write-Host $outDir -ForegroundColor Green
 }
-
