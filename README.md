@@ -12,13 +12,26 @@ Sistema de escritorio para gestionar horarios docentes, asistencia biometrica, c
 - Resumen visual con distribucion de asistencia y deuda.
 - Exportacion de informes PDF.
 
+## Vista del proyecto
+
+| Dashboard | Horario |
+| --- | --- |
+| ![Dashboard](capturas/captura%20pesta%C3%B1a%20dashboard.png) | ![Horario](capturas/captura%20pesta%C3%B1a%20horario.png) |
+
+| Calendario | Reporte |
+| --- | --- |
+| ![Calendario](capturas/captura%20pesta%C3%B1a%20calendario.png) | ![Reporte](capturas/captura%20pesta%C3%B1a%20reporte.png) |
+
+| Informe | Resumen |
+| --- | --- |
+| ![Informe](capturas/captura%20pesta%C3%B1a%20informe.png) | ![Resumen](capturas/captura%20pesta%C3%B1a%20resumen.png) |
+
 ## Tecnologias
 
 - Python
 - PySide6
 - ReportLab
 - Plotly
-- Pandas
 
 ## Ejecucion
 
