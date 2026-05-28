@@ -1,5 +1,10 @@
-PySide6
-xlrd
-pytest
-reportlab
-Pillow
+# Dependencias de ejecucion
+PySide6==6.11.1
+plotly==6.7.0
+reportlab==4.5.1
+xlrd==2.0.2
+matplotlib==3.10.9
+Pillow==12.2.0
+
+# Pruebas
+pytest==9.0.3
