@@ -72,7 +72,7 @@ Visualiza la distribucion porcentual entre horas asistidas y horas deuda, agrupa
 
 ## Tecnologias
 
-- Python
+- Python 3.13.11
 - PySide6
 - ReportLab
 - Plotly
