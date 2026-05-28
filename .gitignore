@@ -28,6 +28,7 @@ dist_installer/
 # Datos locales y privados
 data/
 logs/
+MOTORES FRACCIONADAS/
 *.log
 *.xls
 *.xlsx
