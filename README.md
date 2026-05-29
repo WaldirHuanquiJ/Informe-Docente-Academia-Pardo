@@ -46,10 +46,6 @@ El objetivo del sistema es centralizar el seguimiento de asistencia docente, dif
 
 ## Modulos del sistema
 
-### Dashboard
-
-Muestra indicadores generales de cumplimiento, asistencia, deuda, horas asignadas y comportamiento mensual de los docentes.
-
 ### Horario
 
 Permite cargar y visualizar los horarios academicos. Estos horarios son la base para construir los slots evaluables del reporte.
@@ -61,6 +57,10 @@ Permite configurar dias laborables, no laborables, feriados y suspensiones. Las 
 ### Reporte
 
 Procesa los registros biometricos y los cruza con los horarios cargados. Identifica asistencias, faltas, tardanzas, salidas anticipadas, horas extra y bloques suspendidos.
+
+### Dashboard
+
+Muestra indicadores generales de cumplimiento, asistencia, deuda, horas asignadas y comportamiento mensual de los docentes.
 
 ### Informe
 
