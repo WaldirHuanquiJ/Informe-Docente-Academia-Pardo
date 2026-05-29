@@ -75,7 +75,7 @@ class DashboardView:
     def __init__(self, data_dir: Path) -> None:
         self.tab = QWidget()
         self._data_dir = data_dir
-        self._schedule_path = self._data_dir / "HORARIOS.xlsx"
+        self._schedule_path = self._data_dir / "horario" / "HORARIOS.xlsx"
         self._schedule_aliases_by_dept: dict[str, set[str]] = {}
         self._teacher_schedule_slots: dict[str, dict[int, set[int]]] = {}
         self._schedule_teachers: list[TeacherRecord] = []
@@ -1347,6 +1347,7 @@ class DashboardView:
             widget = item.widget()
             if widget is not None:
                 widget.deleteLater()
+
 
 
 

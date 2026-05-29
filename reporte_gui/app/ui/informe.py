@@ -91,7 +91,7 @@ class InformeView:
         self._data_dir = data_dir
         self._exports_dir = self._data_dir.parent
         self._print_spool_dir = self._data_dir / "_print_spool"
-        self._schedule_path = self._data_dir / "HORARIOS.xlsx"
+        self._schedule_path = self._data_dir / "horario" / "HORARIOS.xlsx"
         self._reporte_engine = ReporteView(data_dir)
         self._schedule_aliases_by_dept: dict[str, set[str]] = {}
         self._teacher_schedule_slots: dict[str, dict[int, set[int]]] = {}
@@ -2172,3 +2172,4 @@ class InformeView:
                 "Impresion completada",
                 f"Se enviaron {sent} informes a:\n{printer_name}",
             )
+

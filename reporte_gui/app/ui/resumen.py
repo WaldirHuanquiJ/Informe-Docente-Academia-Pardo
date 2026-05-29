@@ -35,7 +35,7 @@ class ResumenView:
 
     def __init__(self, data_dir: Path) -> None:
         self._data_dir = data_dir
-        self._schedule_path = data_dir / "HORARIOS.xlsx"
+        self._schedule_path = data_dir / "horario" / "HORARIOS.xlsx"
         self._engine = ReporteView(data_dir)
         self._chart_html_path = data_dir / "_resumen_plotly.html"
         self.report: AttendanceReport | None = None
@@ -702,3 +702,4 @@ class ResumenView:
             }}
             """
         )
+

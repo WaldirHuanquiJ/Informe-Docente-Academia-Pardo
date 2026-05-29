@@ -130,7 +130,7 @@ class ReporteView:
         self.filtered_teachers: list[TeacherRecord] = []
         self.report: AttendanceReport | None = None
         self._data_dir = data_dir
-        self._schedule_path = self._data_dir / "HORARIOS.xlsx"
+        self._schedule_path = self._data_dir / "horario" / "HORARIOS.xlsx"
         self.on_import_xls: callable | None = None
         self.on_clear: callable | None = None
         self._dept_weekdays: dict[str, set[int]] = {}
@@ -1447,6 +1447,7 @@ class ReporteView:
                 except Exception:
                     continue
         return False
+
 
 
 

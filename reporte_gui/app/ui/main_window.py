@@ -35,6 +35,7 @@ class ImportWorker(QObject):
     def __init__(self, data_dir: Path, current_report_path: Path, selected_file: Path | None = None) -> None:
         super().__init__()
         self._data_dir = data_dir
+        self._data_dir.mkdir(parents=True, exist_ok=True)
         self._current_report_path = current_report_path
         self._selected_file = selected_file
 
@@ -43,7 +44,10 @@ class ImportWorker(QObject):
             if self._selected_file and self._selected_file.exists():
                 suffix = self._selected_file.suffix.lower()
                 if suffix == ".csv":
-                    updated = self._selected_file
+                    target = self._data_dir / self._selected_file.name
+                    if self._selected_file.resolve() != target.resolve():
+                        shutil.copy2(self._selected_file, target)
+                    updated = target
                 else:
                     out_csv = self._data_dir / "_runtime_report.csv"
                     ok = export_report_sheet_to_csv(self._selected_file, out_csv, "Reporte de Asistencia")
@@ -68,6 +72,10 @@ class MainWindow(QMainWindow):
         schedule_title_bar_theme(self, is_light=self._effective_theme(config.theme) == "light")
 
         self.data_dir = data_dir
+        self.schedule_dir = self.data_dir / "horario"
+        self.biometric_dir = self.data_dir / "biometrico"
+        self.schedule_dir.mkdir(parents=True, exist_ok=True)
+        self.biometric_dir.mkdir(parents=True, exist_ok=True)
         self._config = config
         self.report_path: Path | None = None
         self.report = None
@@ -399,7 +407,7 @@ class MainWindow(QMainWindow):
         self.reporte_view.info_label.setText("Importando biometrico (XLS/CSV)... espere un momento.")
 
         self._import_thread = QThread(self)
-        self._import_worker = ImportWorker(self.data_dir, self.report_path or (self.data_dir / "_runtime_report.csv"), selected_file)
+        self._import_worker = ImportWorker(self.biometric_dir, self.report_path or (self.biometric_dir / "_runtime_report.csv"), selected_file)
         self._import_worker.moveToThread(self._import_thread)
 
         self._import_thread.started.connect(self._import_worker.run)
@@ -445,10 +453,10 @@ class MainWindow(QMainWindow):
 
             imported_targets: list[Path] = []
             for p in selected_list:
-                if p.resolve().parent == self.data_dir.resolve():
+                if p.resolve().parent == self.schedule_dir.resolve():
                     imported_targets.append(p)
                     continue
-                target = self.data_dir / p.name
+                target = self.schedule_dir / p.name
                 shutil.copy2(p, target)
                 imported_targets.append(target)
 
@@ -532,25 +540,39 @@ class MainWindow(QMainWindow):
             path = Path(saved_path)
             if path.exists():
                 return path
-        direct = self.data_dir / "HORARIOS.xlsx"
+        direct = self.schedule_dir / "HORARIOS.xlsx"
         if direct.exists():
             return direct
         candidates = sorted(
-            self.data_dir.glob("HORARIOS*.xlsx"),
+            list(self.schedule_dir.glob("HORARIOS*.xlsx")) + list(self.schedule_dir.glob("HORARIO*.xlsx")),
             key=lambda p: p.stat().st_mtime if p.exists() else 0,
             reverse=True,
         )
-        return candidates[0] if candidates else None
+        if candidates:
+            return candidates[0]
+        legacy_direct = self.data_dir / "HORARIOS.xlsx"
+        if legacy_direct.exists():
+            return legacy_direct
+        legacy_candidates = sorted(
+            list(self.data_dir.glob("HORARIOS*.xlsx")) + list(self.data_dir.glob("HORARIO*.xlsx")),
+            key=lambda p: p.stat().st_mtime if p.exists() else 0,
+            reverse=True,
+        )
+        return legacy_candidates[0] if legacy_candidates else None
 
     def _resolve_saved_or_local_report(self, saved_path: str | None) -> Path | None:
         if saved_path:
             path = Path(saved_path)
             if path.exists():
                 return path
-        for name in ("_runtime_report.csv", "Libro1.csv"):
-            candidate = self.data_dir / name
-            if candidate.exists():
-                return candidate
+        for base_dir in (self.biometric_dir, self.data_dir):
+            for name in ("_runtime_report.csv", "Libro1.csv"):
+                candidate = base_dir / name
+                if candidate.exists():
+                    return candidate
+        resolved = resolve_report_csv(self.biometric_dir)
+        if resolved:
+            return resolved
         return resolve_report_csv(self.data_dir)
 
     def _save_session_paths(self) -> None:

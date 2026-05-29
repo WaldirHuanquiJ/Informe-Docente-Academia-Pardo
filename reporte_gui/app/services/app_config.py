@@ -51,7 +51,10 @@ def _coerce_dir(raw: str, fallback: Path) -> str:
 
 
 def ensure_dirs(config: AppConfig) -> None:
-    Path(config.data_dir).mkdir(parents=True, exist_ok=True)
+    data_dir = Path(config.data_dir)
+    data_dir.mkdir(parents=True, exist_ok=True)
+    (data_dir / "horario").mkdir(parents=True, exist_ok=True)
+    (data_dir / "biometrico").mkdir(parents=True, exist_ok=True)
     Path(config.log_dir).mkdir(parents=True, exist_ok=True)
     Path(config.exports_dir).mkdir(parents=True, exist_ok=True)
     Path(config.print_spool_dir).mkdir(parents=True, exist_ok=True)
@@ -61,28 +64,42 @@ def bootstrap_legacy_data(config: AppConfig) -> None:
     data_dir = Path(config.data_dir)
     if not LEGACY_DATA_DIR.exists() or LEGACY_DATA_DIR.resolve() == data_dir.resolve():
         return
-    candidates = ("HORARIOS.xlsx", "Libro1.csv", "_runtime_report.csv")
-    for name in candidates:
+    route_map = {
+        "HORARIOS.xlsx": data_dir / "horario" / "HORARIOS.xlsx",
+        "Libro1.csv": data_dir / "biometrico" / "Libro1.csv",
+        "_runtime_report.csv": data_dir / "biometrico" / "_runtime_report.csv",
+    }
+    for name, dst in route_map.items():
         src = LEGACY_DATA_DIR / name
-        dst = data_dir / name
         if src.exists() and not dst.exists():
             try:
+                dst.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(src, dst)
             except Exception:
                 pass
     # Copiar tambien versiones de horario (HORARIOS_YYYYMMDD.xlsx), que son la base actual.
-    for src in LEGACY_DATA_DIR.glob("HORARIOS*.xlsx"):
-        dst = data_dir / src.name
+    for src in list(LEGACY_DATA_DIR.glob("HORARIOS*.xlsx")) + list((LEGACY_DATA_DIR / "horario").glob("HORARIOS*.xlsx")):
+        dst = data_dir / "horario" / src.name
         if not dst.exists():
             try:
+                dst.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(src, dst)
             except Exception:
                 pass
-    for xls in LEGACY_DATA_DIR.glob("*.xls"):
-        dst = data_dir / xls.name
+    for xls in list(LEGACY_DATA_DIR.glob("*.xls")) + list((LEGACY_DATA_DIR / "biometrico").glob("*.xls")):
+        dst = data_dir / "biometrico" / xls.name
         if not dst.exists():
             try:
+                dst.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(xls, dst)
+            except Exception:
+                pass
+    for csv in list(LEGACY_DATA_DIR.glob("*.csv")) + list((LEGACY_DATA_DIR / "biometrico").glob("*.csv")):
+        dst = data_dir / "biometrico" / csv.name
+        if not dst.exists():
+            try:
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(csv, dst)
             except Exception:
                 pass
 

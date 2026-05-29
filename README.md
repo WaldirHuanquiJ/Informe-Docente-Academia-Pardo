@@ -20,21 +20,21 @@ El objetivo del sistema es centralizar el seguimiento de asistencia docente, dif
 
 ## Vista del proyecto
 
-### 1. Dashboard
-
-![Dashboard](capturas/dashboard.png)
-
-### 2. Horario
+### 1. Horario
 
 ![Horario](capturas/horario.png)
 
-### 3. Calendario
+### 2. Calendario
 
 ![Calendario](capturas/calendario.png)
 
-### 4. Reporte
+### 3. Reporte
 
 ![Reporte](capturas/reporte.png)
+
+### 4. Dashboard
+
+![Dashboard](capturas/dashboard.png)
 
 ### 5. Informe
 

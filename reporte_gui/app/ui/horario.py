@@ -119,7 +119,9 @@ class HorarioView:
     def __init__(self, data_dir: Path) -> None:
         self.tab = QWidget()
         self._data_dir = data_dir
-        self._schedule_path = self._data_dir / "HORARIOS.xlsx"
+        self._schedule_dir = self._data_dir / "horario"
+        self._schedule_dir.mkdir(parents=True, exist_ok=True)
+        self._schedule_path = self._schedule_dir / "HORARIOS.xlsx"
         self._workbook: WorkbookData | None = None
         self._teachers: list[TeacherRecord] = []
         self.on_import_horario: callable | None = None
@@ -308,7 +310,7 @@ class HorarioView:
             self.status.setText("El archivo no contiene hojas visibles")
 
     def _refresh_schedule_date_selector(self) -> None:
-        self._available_schedule_versions = list_versioned_schedules(self._data_dir)
+        self._available_schedule_versions = list_versioned_schedules(self._schedule_dir)
         self._updating_date_selector = True
         try:
             if self._available_schedule_versions:
@@ -318,7 +320,7 @@ class HorarioView:
                 if target is None:
                     today = date.today()
                     target = today
-                    selected_today = resolve_schedule_for_date(self._data_dir, today, None)
+                    selected_today = resolve_schedule_for_date(self._schedule_dir, today, None)
                     if selected_today is None:
                         selected_today = self._available_schedule_versions[0][1]
                     self._schedule_path = selected_today
@@ -339,7 +341,7 @@ class HorarioView:
             return
         target = date(qdate.year(), qdate.month(), qdate.day())
         self._selected_schedule_date = target
-        selected = resolve_schedule_for_date(self._data_dir, target, None)
+        selected = resolve_schedule_for_date(self._schedule_dir, target, None)
         if selected is None:
             # Si la fecha es anterior al primer horario, usamos el primero disponible.
             selected = self._available_schedule_versions[0][1]
@@ -350,6 +352,7 @@ class HorarioView:
 
     def set_schedule_file(self, schedule_path: Path) -> None:
         self._schedule_path = schedule_path
+        self._schedule_dir = schedule_path.parent
         dt = None
         for version_date, path in self._available_schedule_versions:
             if path.resolve() == schedule_path.resolve():
@@ -431,7 +434,7 @@ class HorarioView:
             self.on_clear()
 
     def _on_export_teachers_clicked(self) -> None:
-        versioned = list_versioned_schedules(self._data_dir)
+        versioned = list_versioned_schedules(self._schedule_dir)
         if not versioned:
             return
 
@@ -483,7 +486,7 @@ class HorarioView:
         target_path, _ = QFileDialog.getSaveFileName(
             self.tab,
             "Exportar lista de docentes (todas las versiones)",
-            str((self._data_dir / default_name).resolve()),
+            str((self._schedule_dir / default_name).resolve()),
             "CSV (*.csv)",
         )
         if not target_path:

@@ -67,7 +67,7 @@ class CalendarioView:
     def __init__(self, data_dir: Path) -> None:
         self.tab = QWidget()
         self._data_dir = data_dir
-        self._schedule_path = self._data_dir / "HORARIOS.xlsx"
+        self._schedule_path = self._data_dir / "horario" / "HORARIOS.xlsx"
         self._payload = load_calendar(self._data_dir)
         self._loading_table = False
         self.on_calendar_updated: callable | None = None
@@ -664,5 +664,6 @@ class CalendarioView:
         idx = self.susp_schedule_combo.findText(current)
         if idx >= 0:
             self.susp_schedule_combo.setCurrentIndex(idx)
+
 
 
